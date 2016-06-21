@@ -195,17 +195,20 @@
 						mkblk(config.file, i, --retry);
 					};
 
-					xhr.onreadystatechange = function (response) {
-						if (response && xhr.readyState === 4 && xhr.status === 200) {
-							if (xhr.status === 200) {
-								blockRet[i] = xhr.responseText;
-								localStorageService.set(fileHashKey, blockRet);
-								mkblk(config.file, ++i, defaultsSetting.maxRetryTimes);
-							} else {
-								mkblk(config.file, i, --retry);
-							}
-						}
-					};
+					xhr.onreadystatechange = function(response) {
+			                        if (response && xhr.readyState === 4) {
+			                            if (xhr.status === 200) {
+			                                blockRet[i] = xhr.responseText;
+			                                localStorageService.set(fileHashKey, blockRet);
+			                                mkblk(config.file, ++i, defaultsSetting.maxRetryTimes);
+			                            } else {
+			                                if (retry <= 0) {
+			                                    deferred.reject(xhr)
+			                                }
+			                                mkblk(config.file, i, --retry);
+			                            }
+			                        }
+			                    };
 					xhr.send(chunck);
 				};
 
